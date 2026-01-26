@@ -4,3 +4,11 @@ spring:
 
 server:
   port: 8080
+
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  level:
+    root: INFO                      # default level
+    org.springframework: INFO        # Spring framework logs
+    org.hibernate.SQL: WARN          # Hibernate SQL logs (if used)

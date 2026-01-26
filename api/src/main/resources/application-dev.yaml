@@ -1,0 +1,24 @@
+spring:
+  config:
+    activate:
+      on-profile: dev
+  datasource:
+    url: jdbc:postgresql://localhost:5432/unifiedapi_dev
+    username: rpashev
+    password: password
+    driver-class-name: org.postgresql.Driver
+
+  # JPA/Hibernate
+  jpa:
+    hibernate:
+      ddl-auto: update   # auto-create/update tables in dev
+    show-sql: true        # show SQL statements in console
+
+server:
+  port: 8080
+
+logging:
+  level:
+    root: DEBUG
+    org.springframework.boot.autoconfigure: DEBUG
+    com.rpashev.api: DEBUG
