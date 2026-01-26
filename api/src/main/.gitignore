@@ -1,0 +1,24 @@
+# Maven / Java
+target/
+*.log
+*.class
+*.jar
+*.war
+
+# IntelliJ
+.idea/
+*.iml
+out/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Lombok generated files (optional)
+lombok.config
+
+# Spring Boot DevTools restart logs
+spring-boot-devtools.log
+
+# VSCode if you open the project there
+.vscode/
