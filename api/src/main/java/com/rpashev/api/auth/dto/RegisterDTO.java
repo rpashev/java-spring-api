@@ -1,0 +1,4 @@
+package com.rpashev.api.auth.dto;
+
+public class RegisterDTO {
+}
