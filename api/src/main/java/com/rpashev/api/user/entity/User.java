@@ -25,13 +25,13 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    @Column
+    @Column(length = 100)
     private String firstName;
 
-    @Column
+    @Column(length = 100)
     private String lastName;
 
-    @Column
+    @Column(length = 500)
     private String image;
 
     @Column(nullable = false, updatable = false)

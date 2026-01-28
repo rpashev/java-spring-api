@@ -11,7 +11,7 @@ spring:
   # JPA/Hibernate
   jpa:
     hibernate:
-      ddl-auto: update   # auto-create/update tables in dev
+      ddl-auto: validate   # auto-create/update tables in dev
     show-sql: true        # show SQL statements in console
 
 server:
@@ -19,6 +19,9 @@ server:
 
 logging:
   level:
-    root: DEBUG
-    org.springframework.boot.autoconfigure: DEBUG
+    root: INFO
     com.rpashev.api: DEBUG
+    org.springframework.web: INFO
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
