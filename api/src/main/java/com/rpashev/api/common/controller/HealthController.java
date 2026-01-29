@@ -7,12 +7,17 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/health")
+@RequestMapping("/health")
 public class HealthController {
 
     @GetMapping
     public String health() {
         log.info("Health check endpoint called");
         return "OK";
+    }
+
+    @GetMapping("/protected")
+    public String protectedEndpoint() {
+        return "You are authenticated!";
     }
 }

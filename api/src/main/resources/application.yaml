@@ -6,7 +6,8 @@ spring:
     change-log: classpath:db/changelog/db.changelog-master.yaml
 server:
   port: 8080
-
+  servlet:
+    context-path: /api/v1
 logging:
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
@@ -14,3 +15,6 @@ logging:
     root: INFO                      # default level
     org.springframework: INFO        # Spring framework logs
     org.hibernate.SQL: WARN          # Hibernate SQL logs (if used)
+jwt:
+  secret: supergigamegasecretkeyforsureforrealforreal9
+  expiration: 7200000    # 2 hours in ms
