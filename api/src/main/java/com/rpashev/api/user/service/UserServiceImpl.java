@@ -1,6 +1,7 @@
 package com.rpashev.api.user.service;
 
 import com.rpashev.api.auth.dto.AuthResponseDTO;
+import com.rpashev.api.auth.exception.InvalidCredentialsException;
 import com.rpashev.api.auth.security.JwtUtil;
 import com.rpashev.api.user.dto.LoginUserDTO;
 import com.rpashev.api.user.dto.RegisterUserDTO;
@@ -10,6 +11,7 @@ import com.rpashev.api.user.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.util.UUID;
 
@@ -54,11 +56,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public AuthResponseDTO login(LoginUserDTO dto) {
+
         User user = userRepository.findByEmail(dto.getEmail())
-                .orElseThrow(() -> new RuntimeException("Invalid credentials"));
+                .orElseThrow(InvalidCredentialsException::new);
 
         if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Invalid credentials");
+            throw new InvalidCredentialsException();
         }
         String token = jwtUtil.generateToken(user.getId().toString());
 
