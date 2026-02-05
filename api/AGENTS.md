@@ -13,6 +13,12 @@ Best practices for this project and for building a Java Spring REST API.
 - Keep sensitive settings (JWT secret, DB credentials) in config files per profile.
 - Document endpoints with OpenAPI/Swagger annotations.
 
+## Development & Testing Flow
+- Implement features in small slices and run tests after each slice.
+- Prefer a fast local loop: unit tests (`mvn test`) first, then integration tests (`mvn verify`) when touching DB/auth/web layers.
+- Add/adjust tests as part of the feature, not after; keep assertions focused on behavior.
+- Only consider a task complete when the requested behavior is implemented and tests pass (or a clear, recorded reason is provided).
+
 ## General Spring REST API Best Practices
 ### API Design
 - Keep endpoints resource-oriented and consistent (nouns, plural resources, predictable paths).
@@ -56,3 +62,9 @@ Best practices for this project and for building a Java Spring REST API.
 - Keep dependencies up to date and pinned to known good versions.
 - Use consistent formatting and static analysis (e.g., Checkstyle/SpotBugs).
 - Document how to run the app and required env vars in `README`.
+
+## Collaboration Rules
+- Ask unresolved questions at the end of each plan.
+- Keep code concise; avoid unnecessary abstractions.
+- Add clear, succinct comments where they help less-experienced readers; avoid noise.
+- Consider the job done only when the request is fully satisfied.
