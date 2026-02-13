@@ -22,4 +22,5 @@ logging:
     org.hibernate.SQL: WARN          # Hibernate SQL logs (if used)
 jwt:
   secret: supergigamegasecretkeyforsureforrealforreal9
-  expiration: 7200000    # 2 hours in ms
+  expiration: 7200000          # 2 hours in ms
+  refresh-expiration: 2592000000   # 30 days in ms

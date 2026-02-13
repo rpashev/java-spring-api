@@ -44,7 +44,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String token = authHeader.substring(7);
 
             // Validate token
-            if (jwtUtil.validateToken(token)) {
+            if (jwtUtil.validateAccessToken(token)) {
                 String userId = jwtUtil.getSubject(token);
                 Optional<User> userOptional = userRepository.findById(UUID.fromString(userId));
 

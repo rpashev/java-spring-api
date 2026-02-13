@@ -12,6 +12,8 @@ public interface UserService {
 
     AuthResponseDTO login(LoginUserDTO dto);
 
+    AuthResponseDTO refreshToken(String refreshToken);
+
     UserDTO getById(UUID id);
 
 }

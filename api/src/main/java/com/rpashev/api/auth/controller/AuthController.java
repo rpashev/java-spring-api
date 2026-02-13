@@ -1,6 +1,7 @@
 package com.rpashev.api.auth.controller;
 
 import com.rpashev.api.auth.dto.AuthResponseDTO;
+import com.rpashev.api.auth.dto.RefreshTokenRequestDTO;
 import com.rpashev.api.exception.ApiError;
 import com.rpashev.api.user.dto.LoginUserDTO;
 import com.rpashev.api.user.dto.RegisterUserDTO;
@@ -15,8 +16,6 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 @Slf4j
 @RestController
@@ -34,7 +33,7 @@ public class AuthController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Success", content = @Content(schema = @Schema(implementation = AuthResponseDTO.class))),
             @ApiResponse(responseCode = "400", description = "Validation error", content = @Content(schema = @Schema(implementation = ApiError.class))),
-            @ApiResponse(responseCode = "401", description = "Invalid credentials", content = @Content(schema = @Schema(implementation = ApiError.class)))
+            @ApiResponse(responseCode = "409", description = "Email already in use", content = @Content(schema = @Schema(implementation = ApiError.class)))
     })
 
     @PostMapping("/register")
@@ -50,11 +49,24 @@ public class AuthController {
             @ApiResponse(responseCode = "400", description = "Validation error", content = @Content(schema = @Schema(implementation = ApiError.class))),
             @ApiResponse(responseCode = "401", description = "Invalid credentials", content = @Content(schema = @Schema(implementation = ApiError.class)))
     })
+
     @PostMapping("/login")
     public ResponseEntity<AuthResponseDTO> login(@RequestBody @Valid LoginUserDTO dto) {
         AuthResponseDTO response = userService.login(dto);
         return ResponseEntity.ok(response);
+    }
 
+    @Tag(name = "Authentication")
+    @Operation(summary = "Refresh access token")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Success", content = @Content(schema = @Schema(implementation = AuthResponseDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Validation error", content = @Content(schema = @Schema(implementation = ApiError.class))),
+            @ApiResponse(responseCode = "401", description = "Invalid refresh token", content = @Content(schema = @Schema(implementation = ApiError.class)))
+    })
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthResponseDTO> refresh(@RequestBody @Valid RefreshTokenRequestDTO dto) {
+        AuthResponseDTO response = userService.refreshToken(dto.getRefreshToken());
+        return ResponseEntity.ok(response);
     }
 
 }

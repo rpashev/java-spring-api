@@ -1,7 +1,9 @@
 package com.rpashev.api.user.service;
 
 import com.rpashev.api.auth.dto.AuthResponseDTO;
+import com.rpashev.api.auth.exception.EmailAlreadyInUseException;
 import com.rpashev.api.auth.exception.InvalidCredentialsException;
+import com.rpashev.api.auth.exception.InvalidRefreshTokenException;
 import com.rpashev.api.auth.security.JwtUtil;
 import com.rpashev.api.user.dto.LoginUserDTO;
 import com.rpashev.api.user.dto.RegisterUserDTO;
@@ -11,7 +13,6 @@ import com.rpashev.api.user.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.util.UUID;
 
@@ -33,7 +34,7 @@ public class UserServiceImpl implements UserService {
     public AuthResponseDTO register(RegisterUserDTO dto) {
         log.info("Registering user with email={}", dto.getEmail());
         if (userRepository.existsByEmail(dto.getEmail())) {
-            throw new RuntimeException("Email already in use");
+            throw new EmailAlreadyInUseException();
         }
 
         User user = User.builder()
@@ -46,11 +47,13 @@ public class UserServiceImpl implements UserService {
 
         User saved = userRepository.save(user);
 
-        String token = jwtUtil.generateToken(saved.getId().toString());
+        String accessToken = jwtUtil.generateAccessToken(saved.getId().toString());
+        String refreshToken = jwtUtil.generateRefreshToken(saved.getId().toString());
 
         return AuthResponseDTO.builder()
                 .user(mapToDTO(saved))
-                .accessToken(token)
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
                 .build();
     }
 
@@ -63,13 +66,35 @@ public class UserServiceImpl implements UserService {
         if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
             throw new InvalidCredentialsException();
         }
-        String token = jwtUtil.generateToken(user.getId().toString());
+        String accessToken = jwtUtil.generateAccessToken(user.getId().toString());
+        String refreshToken = jwtUtil.generateRefreshToken(user.getId().toString());
 
         return AuthResponseDTO.builder()
                 .user(mapToDTO(user))
-                .accessToken(token)
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
                 .build();
 
+    }
+
+    @Override
+    public AuthResponseDTO refreshToken(String refreshToken) {
+        if (!jwtUtil.validateRefreshToken(refreshToken)) {
+            throw new InvalidRefreshTokenException();
+        }
+
+        String userId = jwtUtil.getSubject(refreshToken);
+        User user = userRepository.findById(UUID.fromString(userId))
+                .orElseThrow(InvalidRefreshTokenException::new);
+
+        String newAccessToken = jwtUtil.generateAccessToken(userId);
+        String newRefreshToken = jwtUtil.generateRefreshToken(userId);
+
+        return AuthResponseDTO.builder()
+                .user(mapToDTO(user))
+                .accessToken(newAccessToken)
+                .refreshToken(newRefreshToken)
+                .build();
     }
 
     @Override

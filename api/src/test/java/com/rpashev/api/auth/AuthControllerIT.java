@@ -1,6 +1,7 @@
 package com.rpashev.api.auth;
 
 import com.rpashev.api.auth.dto.AuthResponseDTO;
+import com.rpashev.api.auth.dto.RefreshTokenRequestDTO;
 import com.rpashev.api.support.IntegrationTestBase;
 import com.rpashev.api.user.dto.LoginUserDTO;
 import com.rpashev.api.user.dto.RegisterUserDTO;
@@ -38,6 +39,7 @@ class AuthControllerIT extends IntegrationTestBase {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getAccessToken()).isNotBlank();
+        assertThat(response.getBody().getRefreshToken()).isNotBlank();
         assertThat(response.getBody().getUser()).isNotNull();
         assertThat(response.getBody().getUser().getEmail()).isEqualTo(dto.getEmail());
     }
@@ -65,7 +67,69 @@ class AuthControllerIT extends IntegrationTestBase {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getAccessToken()).isNotBlank();
+        assertThat(response.getBody().getRefreshToken()).isNotBlank();
         assertThat(response.getBody().getUser()).isNotNull();
+    }
+
+    @Test
+    void registerReturnsConflictWhenEmailAlreadyExists() {
+        String email = uniqueEmail();
+
+        RegisterUserDTO first = new RegisterUserDTO();
+        first.setEmail(email);
+        first.setPassword("password123");
+        first.setFirstName("First");
+        first.setLastName("User");
+        restTemplate.postForEntity("/auth/register", first, AuthResponseDTO.class);
+
+        RegisterUserDTO duplicate = new RegisterUserDTO();
+        duplicate.setEmail(email);
+        duplicate.setPassword("password123");
+        duplicate.setFirstName("Duplicate");
+        duplicate.setLastName("User");
+
+        ResponseEntity<String> response = restTemplate.postForEntity(
+                "/auth/register",
+                duplicate,
+                String.class
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(response.getBody()).contains("Email already in use");
+    }
+
+    @Test
+    void refreshReturnsNewTokensWhenRefreshTokenValid() {
+        AuthResponseDTO auth = registerAndLogin();
+
+        RefreshTokenRequestDTO request = new RefreshTokenRequestDTO();
+        request.setRefreshToken(auth.getRefreshToken());
+
+        ResponseEntity<AuthResponseDTO> response = restTemplate.postForEntity(
+                "/auth/refresh",
+                request,
+                AuthResponseDTO.class
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getAccessToken()).isNotBlank();
+        assertThat(response.getBody().getRefreshToken()).isNotBlank();
+        assertThat(response.getBody().getUser()).isNotNull();
+    }
+
+    @Test
+    void refreshReturnsUnauthorizedWhenRefreshTokenInvalid() {
+        RefreshTokenRequestDTO request = new RefreshTokenRequestDTO();
+        request.setRefreshToken("invalid-refresh-token");
+
+        ResponseEntity<String> response = restTemplate.postForEntity(
+                "/auth/refresh",
+                request,
+                String.class
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
     @Test
