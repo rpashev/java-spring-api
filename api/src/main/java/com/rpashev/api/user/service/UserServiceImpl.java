@@ -9,6 +9,7 @@ import com.rpashev.api.user.dto.LoginUserDTO;
 import com.rpashev.api.user.dto.RegisterUserDTO;
 import com.rpashev.api.user.dto.UserDTO;
 import com.rpashev.api.user.entity.User;
+import com.rpashev.api.user.mapper.UserMapper;
 import com.rpashev.api.user.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,11 +24,13 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final UserMapper userMapper;
 
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil, UserMapper userMapper) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
+        this.userMapper = userMapper;
     }
 
     @Override
@@ -37,13 +40,8 @@ public class UserServiceImpl implements UserService {
             throw new EmailAlreadyInUseException();
         }
 
-        User user = User.builder()
-                .email(dto.getEmail())
-                .password(passwordEncoder.encode(dto.getPassword()))
-                .firstName(dto.getFirstName())
-                .lastName(dto.getLastName())
-                .image(dto.getImage())
-                .build();
+        User user = userMapper.toEntity(dto);
+        user.setPassword(passwordEncoder.encode(dto.getPassword()));
 
         User saved = userRepository.save(user);
 
@@ -51,7 +49,7 @@ public class UserServiceImpl implements UserService {
         String refreshToken = jwtUtil.generateRefreshToken(saved.getId().toString());
 
         return AuthResponseDTO.builder()
-                .user(mapToDTO(saved))
+                .user(userMapper.toDto(saved))
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();
@@ -70,7 +68,7 @@ public class UserServiceImpl implements UserService {
         String refreshToken = jwtUtil.generateRefreshToken(user.getId().toString());
 
         return AuthResponseDTO.builder()
-                .user(mapToDTO(user))
+                .user(userMapper.toDto(user))
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();
@@ -91,7 +89,7 @@ public class UserServiceImpl implements UserService {
         String newRefreshToken = jwtUtil.generateRefreshToken(userId);
 
         return AuthResponseDTO.builder()
-                .user(mapToDTO(user))
+                .user(userMapper.toDto(user))
                 .accessToken(newAccessToken)
                 .refreshToken(newRefreshToken)
                 .build();
@@ -101,16 +99,6 @@ public class UserServiceImpl implements UserService {
     public UserDTO getById(UUID id) {
         User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
 
-        return mapToDTO(user);
-    }
-
-    private UserDTO mapToDTO(User user) {
-        return UserDTO.builder()
-                .id(user.getId())
-                .email(user.getEmail())
-                .firstName(user.getFirstName())
-                .lastName(user.getLastName())
-                .image(user.getImage())
-                .build();
+        return userMapper.toDto(user);
     }
 }

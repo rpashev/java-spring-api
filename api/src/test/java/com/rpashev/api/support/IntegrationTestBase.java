@@ -15,7 +15,7 @@ public abstract class IntegrationTestBase {
             .withPassword("test");
 
     static {
-        // Start once per JVM so Spring context caching doesn't hold stale JDBC ports across IT classes.
+        // Start once per JVM (not once per test class) so Spring context caching doesn't hold stale JDBC ports across IT classes.
         POSTGRES.start();
     }
 
@@ -29,3 +29,18 @@ public abstract class IntegrationTestBase {
         registry.add("spring.jpa.show-sql", () -> "false");
     }
 }
+
+
+//When you run an integration test:
+//1. JVM starts
+//2. IntegrationTestBase class is loaded
+//3. Static block runs → PostgreSQL container starts
+//4. Spring Boot test context initializes
+//5. @DynamicPropertySource injects DB config
+//6. DataSource connects to container
+//7. Liquibase runs migrations
+//8. Web server starts on random port
+//9. Test method executes
+//10. HTTP calls go through full stack
+//11. Assertions run
+//12. Context is cached for next test class

@@ -7,7 +7,9 @@ import com.rpashev.api.auth.exception.InvalidRefreshTokenException;
 import com.rpashev.api.auth.security.JwtUtil;
 import com.rpashev.api.user.dto.LoginUserDTO;
 import com.rpashev.api.user.dto.RegisterUserDTO;
+import com.rpashev.api.user.dto.UserDTO;
 import com.rpashev.api.user.entity.User;
+import com.rpashev.api.user.mapper.UserMapper;
 import com.rpashev.api.user.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,6 +39,9 @@ class UserServiceImplTest {
 
     @Mock
     private JwtUtil jwtUtil;
+
+    @Mock
+    private UserMapper userMapper;
 
     @InjectMocks
     private UserServiceImpl userService;
@@ -73,9 +78,15 @@ class UserServiceImplTest {
 
         when(userRepository.existsByEmail(dto.getEmail())).thenReturn(false);
         when(passwordEncoder.encode(dto.getPassword())).thenReturn("encoded");
+        when(userMapper.toEntity(dto)).thenReturn(User.builder()
+                .email(dto.getEmail())
+                .firstName(dto.getFirstName())
+                .lastName(dto.getLastName())
+                .build());
         when(userRepository.save(any(User.class))).thenReturn(savedUser);
         when(jwtUtil.generateAccessToken(userId.toString())).thenReturn("jwt-token");
         when(jwtUtil.generateRefreshToken(userId.toString())).thenReturn("refresh-token");
+        when(userMapper.toDto(savedUser)).thenReturn(UserDTO.builder().id(userId).email(dto.getEmail()).build());
 
         AuthResponseDTO response = userService.register(dto);
 
@@ -137,6 +148,7 @@ class UserServiceImplTest {
         when(passwordEncoder.matches(dto.getPassword(), user.getPassword())).thenReturn(true);
         when(jwtUtil.generateAccessToken(userId.toString())).thenReturn("jwt-token");
         when(jwtUtil.generateRefreshToken(userId.toString())).thenReturn("refresh-token");
+        when(userMapper.toDto(user)).thenReturn(UserDTO.builder().id(userId).email(dto.getEmail()).build());
 
         AuthResponseDTO response = userService.login(dto);
 
@@ -172,6 +184,7 @@ class UserServiceImplTest {
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(jwtUtil.generateAccessToken(userId.toString())).thenReturn("new-access-token");
         when(jwtUtil.generateRefreshToken(userId.toString())).thenReturn("new-refresh-token");
+        when(userMapper.toDto(user)).thenReturn(UserDTO.builder().id(userId).email(user.getEmail()).build());
 
         AuthResponseDTO response = userService.refreshToken(refreshToken);
 
