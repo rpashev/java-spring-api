@@ -24,3 +24,17 @@ jwt:
   secret: supergigamegasecretkeyforsureforrealforreal9
   expiration: 7200000          # 2 hours in ms
   refresh-expiration: 2592000000   # 30 days in ms
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true

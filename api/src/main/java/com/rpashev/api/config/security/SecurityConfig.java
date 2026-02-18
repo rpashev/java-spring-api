@@ -27,7 +27,8 @@ public class SecurityConfig {
                                 "/auth/**",
                                 "/health",
                                 "/swagger-ui/**",
-                                "/v3/api-docs/**"
+                                "/v3/api-docs/**",
+                                "/actuator/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
@@ -41,3 +42,4 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 }
+
