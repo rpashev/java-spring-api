@@ -21,3 +21,6 @@ logging:
     root: INFO
     org.springframework.boot.autoconfigure: WARN
     com.rpashev.api: INFO
+
+logbook:
+  strategy: without-body

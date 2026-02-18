@@ -14,12 +14,42 @@ server:
   servlet:
     context-path: /api/v1
 logging:
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
   level:
     root: INFO                      # default level
     org.springframework: INFO        # Spring framework logs
     org.hibernate.SQL: WARN          # Hibernate SQL logs (if used)
+    org.zalando.logbook: TRACE
+
+logbook:
+  format:
+    style: json
+  predicate:
+    exclude:
+      - path: /actuator/**
+      - path: /swagger-ui/**
+      - path: /v3/api-docs/**
+  obfuscate:
+    headers:
+      - Authorization
+      - Cookie
+      - Set-Cookie
+      - X-API-KEY
+      - Proxy-Authorization
+    parameters:
+      - password
+      - access_token
+      - refresh_token
+      - token
+      - client_secret
+      - secret
+    json-body-fields:
+      - password
+      - currentPassword
+      - newPassword
+      - accessToken
+      - refreshToken
+      - token
+      - secret
 jwt:
   secret: supergigamegasecretkeyforsureforrealforreal9
   expiration: 7200000          # 2 hours in ms
